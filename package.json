@@ -1,5 +1,5 @@
 {
-    "name": "frappe-gantt",
+    "name": "gantt-planner",
     "version": "1.0.3",
     "description": "A simple, modern, interactive gantt library for the web",
     "main": "src/index.js",
