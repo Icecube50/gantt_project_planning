@@ -1,3 +1,5 @@
+<strong>Forked from [Frappe](https://github.com/frappe/gantt)</strong>
+
 <div align="center" markdown="1">
     <img src=".github/gantt-logo.jpg" width="80">
     <h1>Frappe Gantt</h1>
