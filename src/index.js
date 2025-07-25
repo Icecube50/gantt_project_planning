@@ -120,7 +120,39 @@ export default class Gantt {
     }
 
     setup_tasks(tasks) {
-        this.tasks = tasks
+        let tasks_and_resources = []
+        for (let task of tasks) {
+            task.is_resource = false;
+            task.has_resources = false;
+            tasks_and_resources.push(task);
+
+            if (task.resources !== undefined && task.resources.length > 0) {
+                for (let resource of task.resources) {
+                    let resource_task = {
+                        id: resource.name,
+                        name: resource.name,
+                        start: task.start,
+                        end: task.end,
+                        duration: task.duration,
+                        workload: resource.workload,
+                        is_resource: true,
+                    };
+                    tasks_and_resources.push(resource_task);
+                }
+                task.has_resources = true;
+            }
+        }
+
+        tasks_and_resources = tasks_and_resources.sort((a, b) => {
+            if(a.is_resource && !b.is_resource) return 1
+            if(!a.is_resource && b.is_resource) return -1
+            if(a.is_resource && b.is_resource) return 0
+            if(!a.is_resource && !b.is_resource) return 0
+            return 0
+        })
+
+        let resource_ids = new Map()
+        this.tasks = tasks_and_resources
             .map((task, i) => {
                 if (!task.start) {
                     console.error(
@@ -163,7 +195,14 @@ export default class Gantt {
                 }
 
                 // cache index
-                task._index = i;
+                if(task.is_resource){
+                    if(!resource_ids.has(task.id)){
+                        resource_ids.set(task.id, i);
+                    }
+                    task._index = resource_ids.get(task.id)
+                }
+                else
+                    task._index = i;
 
                 // if hours is not set, assume the last day is full day
                 // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
@@ -186,7 +225,7 @@ export default class Gantt {
                     }
                     task.dependencies = deps;
                 }
-
+                
                 // uids
                 if (!task.id) {
                     task.id = generate_id(task);
@@ -199,6 +238,7 @@ export default class Gantt {
                 return task;
             })
             .filter((t) => t);
+
         this.setup_dependencies();
     }
 
