@@ -129,12 +129,14 @@ export default class Gantt {
             if (task.resources !== undefined && task.resources.length > 0) {
                 for (let resource of task.resources) {
                     let resource_task = {
-                        id: resource.name,
+                        id: `${task.id}_${resource.name}`,
+                        resource_group: resource.name,
                         name: resource.name,
                         start: task.start,
                         end: task.end,
                         duration: task.duration,
                         workload: resource.workload,
+                        dependencies: task.id,
                         is_resource: true,
                     };
                     tasks_and_resources.push(resource_task);
@@ -196,10 +198,10 @@ export default class Gantt {
 
                 // cache index
                 if(task.is_resource){
-                    if(!resource_ids.has(task.id)){
-                        resource_ids.set(task.id, i);
+                    if(!resource_ids.has(task.resource_group)){
+                        resource_ids.set(task.resource_group, i);
                     }
-                    task._index = resource_ids.get(task.id)
+                    task._index = resource_ids.get(task.resource_group)
                 }
                 else
                     task._index = i;
@@ -902,6 +904,9 @@ export default class Gantt {
     make_arrows() {
         this.arrows = [];
         for (let task of this.tasks) {
+            if(task.is_resource)
+                 continue; // Skip resource tasks
+
             let arrows = [];
             arrows = task.dependencies
                 .map((task_id) => {
@@ -1155,6 +1160,10 @@ export default class Gantt {
             y_on_start = e.offsetY || e.layerY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
+            let parent_bar = this.get_bar(parent_bar_id); 
+            if(parent_bar.task.is_resource)
+                return; // Do not allow dragging of resource bars
+
             let ids;
             if (this.options.move_dependencies) {
                 ids = [
