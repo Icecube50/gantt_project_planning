@@ -4,6 +4,7 @@ import { $, createSVG } from './svg_utils';
 import Arrow from './arrow';
 import Bar from './bar';
 import Popup from './popup';
+import Types from './types';
 
 import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES } from './defaults';
 
@@ -120,41 +121,35 @@ export default class Gantt {
     }
 
     setup_tasks(tasks) {
-        let tasks_and_resources = []
-        for (let task of tasks) {
-            task.is_resource = false;
-            task.has_resources = false;
-            tasks_and_resources.push(task);
+        let sorted_tasks = []
 
-            if (task.resources !== undefined && task.resources.length > 0) {
-                for (let resource of task.resources) {
-                    let resource_task = {
-                        id: `${task.id}_${resource.name}`,
-                        resource_group: resource.name,
-                        name: resource.name,
-                        start: task.start,
-                        end: task.end,
-                        duration: task.duration,
-                        workload: resource.workload,
-                        dependencies: task.id,
-                        is_resource: true,
-                    };
-                    tasks_and_resources.push(resource_task);
-                }
-                task.has_resources = true;
+        //  project
+        //      tasks of project
+        //
+        //  project_2
+        //      tasks of project_2
+        //
+        //  resources
+
+        sorted_tasks = tasks.sort((a, b) => {
+            // Resources last
+            if(a.type === Types.RESOURCE || b.type === Types.RESOURCE){
+                if(a.type !== Types.RESOURCE)
+                    return -1
+                
+                if(b.type !== Types.RESOURCE)
+                    return 1
+
+                // Sort resources by name
+                return a.name.localeCompare(b.name)
             }
-        }
 
-        tasks_and_resources = tasks_and_resources.sort((a, b) => {
-            if(a.is_resource && !b.is_resource) return 1
-            if(!a.is_resource && b.is_resource) return -1
-            if(a.is_resource && b.is_resource) return 0
-            if(!a.is_resource && !b.is_resource) return 0
-            return 0
+            // Sort projects & tasks by id
+            return a.id.localeCompare(b.id)
         })
 
         let resource_ids = new Map()
-        this.tasks = tasks_and_resources
+        this.tasks = sorted_tasks
             .map((task, i) => {
                 if (!task.start) {
                     console.error(
@@ -197,11 +192,11 @@ export default class Gantt {
                 }
 
                 // cache index
-                if(task.is_resource){
-                    if(!resource_ids.has(task.resource_group)){
-                        resource_ids.set(task.resource_group, i);
+                if(task.type === Types.RESOURCE){
+                    if(!resource_ids.has(task.id)){
+                        resource_ids.set(task.id, i);
                     }
-                    task._index = resource_ids.get(task.resource_group)
+                    task._index = resource_ids.get(task.id)
                 }
                 else
                     task._index = i;
@@ -904,8 +899,11 @@ export default class Gantt {
     make_arrows() {
         this.arrows = [];
         for (let task of this.tasks) {
-            if(task.is_resource)
-                 continue; // Skip resource tasks
+            if(task.type === Types.RESOURCE
+                || !task.link_by_arrow
+            ){
+                continue; // Skip resource tasks
+            }
 
             let arrows = [];
             arrows = task.dependencies
@@ -1161,7 +1159,7 @@ export default class Gantt {
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             let parent_bar = this.get_bar(parent_bar_id); 
-            if(parent_bar.task.is_resource)
+            if(parent_bar.task.type === Types.RESOURCE)
                 return; // Do not allow dragging of resource bars
 
             let ids;

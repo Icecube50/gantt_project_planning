@@ -220,13 +220,26 @@ export default class Bar {
             x_coord = this.x + this.image_size + 5;
         }
 
-        createSVG('text', {
+        if(this.task.textColor){
+            createSVG('text', {
             x: x_coord,
             y: this.y + this.height / 2,
             innerHTML: this.task.name,
             class: 'bar-label',
             append_to: this.bar_group,
-        });
+            style: `fill: ${this.task.textColor};`
+            });
+        }
+        else{
+            createSVG('text', {
+            x: x_coord,
+            y: this.y + this.height / 2,
+            innerHTML: this.task.name,
+            class: 'bar-label',
+            append_to: this.bar_group,
+            });
+        }
+
         // labels get BBox in the next tick
         requestAnimationFrame(() => this.update_label_position());
     }
