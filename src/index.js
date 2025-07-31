@@ -4,11 +4,28 @@ import { $, createSVG } from './svg_utils';
 import Arrow from './arrow';
 import Bar from './bar';
 import Popup from './popup';
-import Types from './types';
 
 import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES } from './defaults';
 
 import './styles/gantt.css';
+
+export class ChartItemType {
+    static PROJECT = 1
+    static TASK = 2
+    static RESOURCE = 3
+}
+
+export class ChartItem {
+    constructor(id, type, name, start, end, dependencies, color) {
+        this.ID = id
+        this.Type = type
+        this.Name = name
+        this.Start = start
+        this.End = end
+        this.Dependencies = dependencies
+        this.Color = color
+    }
+}
 
 export default class GanttChart {
     constructor(wrapper, tasks, options) {
@@ -120,24 +137,34 @@ export default class GanttChart {
         this.change_view_mode(undefined, true);
     }
 
+    setup_map_to_internal(chartItems){
+        let result = []
+        for(let it of chartItems){
+            let entry = {
+                id: it.ID,
+                type: it.Type,
+                name: it.Name,
+                start: it.Start,
+                end: it.End,
+                dependencies: it.Dependencies,
+                color: it.Color,
+            }
+
+            result.push(entry)
+        }
+
+        return result
+    }
+
     setup_tasks(tasks) {
-        let sorted_tasks = []
-
-        //  project
-        //      tasks of project
-        //
-        //  project_2
-        //      tasks of project_2
-        //
-        //  resources
-
-        sorted_tasks = tasks.sort((a, b) => {
+        let map = this.setup_map_to_internal(tasks)
+        let sorted_tasks = map.sort((a, b) => {
             // Resources last
-            if (a.type === Types.RESOURCE || b.type === Types.RESOURCE) {
-                if (a.type !== Types.RESOURCE)
+            if (a.type === ChartItemType.RESOURCE || b.type === ChartItemType.RESOURCE) {
+                if (a.type !== ChartItemType.RESOURCE)
                     return -1
 
-                if (b.type !== Types.RESOURCE)
+                if (b.type !== ChartItemType.RESOURCE)
                     return 1
 
                 // Sort resources by name
@@ -193,7 +220,7 @@ export default class GanttChart {
             }
 
             // cache index
-            if (task.type === Types.RESOURCE) {
+            if (task.type === ChartItemType.RESOURCE) {
                 if (!resource_ids.has(task.id)) {
                     resource_ids.set(task.id, row_id);
                     row_id++
@@ -228,7 +255,7 @@ export default class GanttChart {
             }
 
             // uids
-            if (!task.id || task.type === Types.RESOURCE) {
+            if (!task.id || task.type === ChartItemType.RESOURCE) {
                 task.id = generate_id(task);
             } else if (typeof task.id === 'string') {
                 task.id = task.id.replaceAll(' ', '_');
@@ -902,7 +929,7 @@ export default class GanttChart {
     make_arrows() {
         this.arrows = [];
         for (let task of this.tasks) {
-            if (task.type === Types.RESOURCE
+            if (task.type === ChartItemType.RESOURCE
                 || !task.link_by_arrow
             ) {
                 continue; // Skip resource tasks
@@ -1162,7 +1189,7 @@ export default class GanttChart {
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             let parent_bar = this.get_bar(parent_bar_id);
-            if (parent_bar.task.type === Types.RESOURCE)
+            if (parent_bar.task.type === ChartItemType.RESOURCE)
                 return; // Do not allow dragging of resource bars
 
             let ids;
