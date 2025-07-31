@@ -10,7 +10,7 @@ import { DEFAULT_OPTIONS, DEFAULT_VIEW_MODES } from './defaults';
 
 import './styles/gantt.css';
 
-export default class Gantt {
+export default class GanttChart {
     constructor(wrapper, tasks, options) {
         this.setup_wrapper(wrapper);
         this.setup_options(options);
@@ -1599,7 +1599,7 @@ export default class Gantt {
     /**
      * Clear all elements from the parent svg element
      *
-     * @memberof Gantt
+     * @memberof GanttChart
      */
     clear() {
         this.$svg.innerHTML = '';
@@ -1611,7 +1611,7 @@ export default class Gantt {
     }
 }
 
-Gantt.VIEW_MODE = {
+GanttChart.VIEW_MODE = {
     HOUR: DEFAULT_VIEW_MODES[0],
     QUARTER_DAY: DEFAULT_VIEW_MODES[1],
     HALF_DAY: DEFAULT_VIEW_MODES[2],
