@@ -379,19 +379,25 @@ export default class Bar {
                         task: this.task,
                         target: this.$bar,
                     });
-                this.gantt.$container
-                    .querySelector(`.highlight-${task_id}`)
-                    .classList.remove('hide');
+                    try{
+                        this.gantt.$container
+                            .querySelector(`.highlight-${task_id}`)
+                             .classList.remove('hide');
+                    }
+                    catch{}
             }, 200);
         });
         $.on(this.group, 'mouseleave', () => {
             clearTimeout(timeout);
             if (this.gantt.options.popup_on === 'hover')
                 this.gantt.popup?.hide?.();
-            this.gantt.$container
-                .querySelector(`.highlight-${task_id}`)
-                .classList.add('hide');
-        });
+            try{
+                this.gantt.$container
+                  .querySelector(`.highlight-${task_id}`)
+                    .classList.add('hide');
+            }
+            catch{}
+        }); 
 
         $.on(this.group, 'click', () => {
             this.gantt.trigger_event('click', [this.task]);

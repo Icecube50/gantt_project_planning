@@ -491,12 +491,17 @@ export default class GanttChart {
             this.$container.style.height = grid_height + 'px';
     }
 
+    getRowHeight(){
+        return this.options.bar_height + this.options.padding;
+    }
+
     make_grid_rows() {
         const rows_layer = createSVG('g', { append_to: this.layers.grid });
 
         const row_width = this.dates.length * this.config.column_width;
-        const row_height = this.options.bar_height + this.options.padding;
+        const row_height = this.getRowHeight();
 
+        this.row_count = 0;
         let y = this.config.header_height;
         for (
             let y = this.config.header_height;
@@ -511,6 +516,7 @@ export default class GanttChart {
                 class: 'grid-row',
                 append_to: rows_layer,
             });
+            this.row_count++;
         }
     }
 
