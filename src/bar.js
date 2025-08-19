@@ -114,8 +114,10 @@ export default class Bar {
             ry: this.corner_radius,
             class: 'bar',
             append_to: this.bar_group,
+            opacity: 0.5,
         });
-        if (this.task.color) this.$bar.style.fill = this.task.color;
+        if (this.task.color) 
+            this.$bar.style.fill = this.task.color;
         animateSVG(this.$bar, 'width', 0, this.width);
 
         if (this.invalid) {
@@ -160,8 +162,8 @@ export default class Bar {
             class: 'bar-progress',
             append_to: this.bar_group,
         });
-        if (this.task.color_progress)
-            this.$bar_progress.style.fill = this.task.color_progress;
+        if (this.task.color)
+            this.$bar_progress.style.fill = this.task.color;
         const x =
             (date_utils.diff(
                 this.task._start,

@@ -16,7 +16,7 @@ export class ChartItemType {
 }
 
 export class ChartItem {
-    constructor(id, type, name, start, end, dependencies, color) {
+    constructor(id, type, name, start, end, dependencies, color, progress) {
         this.ID = id
         this.Type = type
         this.Name = name
@@ -24,6 +24,7 @@ export class ChartItem {
         this.End = end
         this.Dependencies = dependencies
         this.Color = color
+        this.Progress = progress
     }
 }
 
@@ -148,6 +149,7 @@ export default class GanttChart {
                 end: it.End,
                 dependencies: it.Dependencies,
                 color: it.Color,
+                progress: it.Progress,
             }
 
             result.push(entry)
@@ -168,7 +170,7 @@ export default class GanttChart {
                     return 1
 
                 // Sort resources by name
-                return a.name.localeCompare(b.name)
+                return 0
             }
 
             // Sort projects & tasks by id
