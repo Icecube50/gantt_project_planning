@@ -12,7 +12,8 @@ import './styles/gantt.css';
 export class ChartItemType {
     static PROJECT = 1
     static TASK = 2
-    static RESOURCE = 3
+    static MILESTONE = 3
+    static RESOURCE = 4
 }
 
 export class ChartItem {
