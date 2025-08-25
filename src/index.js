@@ -162,20 +162,21 @@ export default class GanttChart {
     setup_tasks(tasks) {
         let map = this.setup_map_to_internal(tasks)
         let sorted_tasks = map.sort((a, b) => {
-            // Resources last
-            if (a.type === ChartItemType.RESOURCE || b.type === ChartItemType.RESOURCE) {
-                if (a.type !== ChartItemType.RESOURCE)
-                    return -1
+            return 0
+            // // Resources last
+            // if (a.type === ChartItemType.RESOURCE || b.type === ChartItemType.RESOURCE) {
+            //     if (a.type !== ChartItemType.RESOURCE)
+            //         return -1
 
-                if (b.type !== ChartItemType.RESOURCE)
-                    return 1
+            //     if (b.type !== ChartItemType.RESOURCE)
+            //         return 1
 
-                // Sort resources by name
-                return 0
-            }
+            //     // Sort resources by name
+            //     return 0
+            // }
 
-            // Sort projects & tasks by id
-            return a.id.localeCompare(b.id)
+            // // Sort projects & tasks by id
+            // return a.id.localeCompare(b.id)
         })
 
         let resource_ids = new Map()
@@ -223,17 +224,11 @@ export default class GanttChart {
             }
 
             // cache index
-            if (task.type === ChartItemType.RESOURCE) {
-                if (!resource_ids.has(task.id)) {
+            if (!resource_ids.has(task.id)) {
                     resource_ids.set(task.id, row_id);
                     row_id++
-                }
-                task._index = resource_ids.get(task.id)
-            }
-            else{
-                task._index = row_id;
-                row_id++
-            }
+                }   
+            task._index = resource_ids.get(task.id)
 
             // if hours is not set, assume the last day is full day
             // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
@@ -258,14 +253,7 @@ export default class GanttChart {
             }
 
             // uids
-            if (!task.id || task.type === ChartItemType.RESOURCE) {
-                task.id = generate_id(task);
-            } else if (typeof task.id === 'string') {
-                task.id = task.id.replaceAll(' ', '_');
-            } else {
-                task.id = `${task.id}`;
-            }
-
+            task.id = generate_id(task);
             this.tasks.push(task);
         }
 
